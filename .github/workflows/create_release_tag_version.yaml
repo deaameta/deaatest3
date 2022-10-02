@@ -1,0 +1,21 @@
+name: Create Release Tag Version
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bump version and push tag
+        id: tag
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: $
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: $
+          name: $
+          body: $

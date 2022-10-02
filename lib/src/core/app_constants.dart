@@ -1,0 +1,44 @@
+// const String BaseUrl = "https://metagols.com/connect/public/api/";
+// ignore_for_file: constant_identifier_names
+
+// const String BaseUrl = "https://api.metagols.com/";
+// const String ApiUrl = "https://api.golstaking.io/api/";// #Todo Live Server
+const String ApiUrl = "https://stakingapi.metastaging.dev/api/"; // #Todo Test Server
+// const String ApiUrl = "http://192.168.11.214:8000/api/"; // #Todo Test Server
+// const String JoinUrl = " https://api.metagols.com/join/";
+const String ImageUrl = "https://gol-coin-staking.s3.me-south-1.amazonaws.com";
+// const String shareableUrl = "https://staging.metagols.com/join/";
+
+const String IS_LOGIN = "login";
+const String ID = "id";
+const String FIRSTNAME = "firstname";
+const String LASTNAME = "lastname";
+const String USERNAME = "username";
+const String PASSWORD = "password";
+const String EMAIL = "email";
+const String TOKEN = "token";
+const String GOLC = "golc";
+const String EXPIRESIN = "expires_in";
+const String Birthdate = "birthdate";
+const String UploadedContacts = "uploaded_contacts";
+const String IMAGE = "image";
+const String NOTIFICATIONSCOUNT = "notifications_count";
+const String ISCONTACTCOUNT = "is_contact_count";
+const String COVER_IMAGE = "cover_image";
+const String ADDRESS = "address";
+const String WEBSITE = "webSite";
+const String MOBILE = "mobile";
+const String SLUG = "slug";
+const String PROFILE_IMAGE = "profile_image";
+const String THEME = "theme";
+const String MY_CONTACTS = "my_contacts";
+const String CONTACTS = "contacts";
+const String CREATEDAT = "created_at";
+const String VERIFIED = "verified";
+const String golc = "golc";
+const String RESOLUTION = "resolution";
+const String TFA = "tfa";
+const String PUBLICKEY = "public_key";
+const String PlacholderImageUrl = "https://via.placeholder.com/150";
+const String SVG_PATH = "assets/svg_images/";
+const String IMAGE_PATH = "assets/images/";

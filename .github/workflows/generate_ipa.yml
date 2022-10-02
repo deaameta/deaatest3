@@ -1,0 +1,123 @@
+name: Generate ipa for QA
+
+on: 
+  push:
+    tags: 
+      - '*'
+  workflow_dispatch:
+      
+jobs:
+ deploy_ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code from ref
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+        #PERSONAL_ACCESS_TOKEN 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
+        
+      # - name: Install the Apple certificate and provisioning profile
+      #   env:
+      #     # go to keychain and find you CERTIFICATE then exported as Certificates.p12 then run base64 Certificates.p12
+      #     BUILD_CERTIFICATE_BASE64: $
+      #     # when you export BUILD_CERTIFICATE_BASE64 you choose password for it use it here
+      #     APPSTORE_CERT_PASSWORD: $
+      #     # when you use auto sign from xcode you should go to ~/Library/MobileDevice/Provisioning Profiles then delete all and go to your project re-sign it auto then you will find one *.mobileprovision then run base64  *.mobileprovision
+      #     BUILD_PROVISION_PROFILE_BASE64: $
+      #     # any random string
+      #     KEYCHAIN_PASSWORD: $
+      #   run: |
+      #     # create variables
+      #     CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+      #     PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+      #     KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+      #     # import certificate and provisioning profile from secrets
+      #     echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
+      #     echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+      #     # create temporary keychain
+      #     security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+      #     security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+      #     security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+      #     # import certificate to keychain
+      #     security import $CERTIFICATE_PATH -P "$APPSTORE_CERT_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+      #     security list-keychain -d user -s $KEYCHAIN_PATH
+      #     # apply provisioning profile
+      #     mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+      #     cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+          
+      - name: Run Flutter tasks
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.0.5'
+          channel: "stable"
+      - uses: actions/cache@v2
+        with:
+          path: $/.pub-cache
+          key: $-pub-$
+          restore-keys: $-pub-
+
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          # Optionally strip `v` prefix
+          strip_v: true
+      - name: Use tag
+        run: echo $
+
+      - run: flutter pub get
+      # - run: flutter build ipa --release --export-method development
+  
+# Important! Cleanup: remove the certificate and provisioning profile from the runner!
+      - uses: sinoru/actions-setup-keychain@v1.0
+
+
+      - name: Release to Apple Connect (internal)
+        run: | 
+          cd ios
+          sudo gem update cocoapods --pre
+          pod update
+          bundle update
+          git remote rm origin
+          git remote add origin  https://aboodhelani1998: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@github.com/MetagolsApp/nft-marketplace-flutter.git
+          bundle exec fastlane ios debug
+          cd ..
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: '$'
+          FASTLANE_USER: '$'
+          MATCH_PASSWORD: '$'
+          FASTLANE_PASSWORD: '$'
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: '$'
+          SPACESHIP_2FA_SMS_DEFAULT_PHONE_NUMBER: '$'
+          FASTLANE_SESSION: '$'
+          # KEYCHAIN_PATH: "/Users/runner/Library/Keychains/login.keychain-db"
+      # - name: Release to Apple Connect (internal)
+      #   uses: maierj/fastlane-action@v1.4.0
+      #   with:
+      #     lane: deploy
+      #     subdirectory: ios
+      #   env:
+          
+      #     FASTLANE_USER: '$'
+      #     FASTLANE_PASSWORD: '$'
+      #     MATCH_PASSWORD: '$'
+      #     FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: '$'
+      #     GIT_AUTHORIZATION: '$'
+
+          # APP_STORE_CONNECT_TEAM_ID: '$'
+          # DEVELOPER_APP_ID: '$'
+          # DEVELOPER_APP_IDENTIFIER: '$'
+          # DEVELOPER_PORTAL_TEAM_ID: '$'
+          # FASTLANE_APPLE_ID: '$'
+          # PROVISIONING_PROFILE_SPECIFIER: '$'
+          # TEMP_KEYCHAIN_PASSWORD: '$'
+          # TEMP_KEYCHAIN_USER: '$'
+
+      - name: Push IPA to Releases
+        uses: actions/upload-artifact@v2
+        with:
+          name: assets
+          path: $/ios/*.ipa
+  
+

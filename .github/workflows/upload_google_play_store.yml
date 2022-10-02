@@ -1,0 +1,91 @@
+name: Upload Google Play Store
+
+on: 
+  push:
+    tags: 
+      - '*'
+  workflow_dispatch:
+jobs:
+  release:
+    name: Test, build and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11.x'
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          channel: beta
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Cache pub dependencies
+        uses: actions/cache@v2
+        with:
+          path: $/.pub-cache
+          key: $-pub-$
+          restore-keys: $-pub-
+      - name: Download pub dependencies
+        run: flutter pub get
+
+      # - name: Run analyzer
+      #   run: flutter analyze
+
+      # - name: Run tests
+      #   run: flutter test
+
+
+      - name: Download Android keystore
+        id: android_keystore
+        uses: timheuer/base64-to-file@v1.0.3
+        with:
+          fileName: key.jks
+          # go to key path in project & run: base64 key.jks
+          encodedString: $
+
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          # Optionally strip `v` prefix
+          strip_v: true
+      - name: Use tag
+        run: echo $
+
+      - name: Build Android App Bundle
+        run: flutter build appbundle
+
+
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+      - name: Cache bundle dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: $-gems-$
+          restore-keys: $-gems-
+      - name: Download bundle dependencies
+        run: |
+          gem install bundler:2.0.2
+          bundle config path vendor/bundle
+          cd android
+          bundle install
+          cd ..
+
+      - name: Release to Google Play (internal)
+       # env:
+       #   SUPPLY_PACKAGE_NAME: $
+       #   SUPPLY_JSON_KEY_DATA: $
+        run: | 
+          cd android
+          bundle exec fastlane android deploy 
+          cd ..
+          
